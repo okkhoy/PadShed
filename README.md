@@ -1,8 +1,8 @@
-# Rudiment Room
+# padshed
 
 A focused, browser-based practice room for the 40 Percussive Arts Society International Drum Rudiments.
 
-Rudiment Room combines live snare notation, a synchronized sticking strip, a Web Audio metronome, a tempo challenge, and a MusicXML score room in one static site.
+padshed combines live snare notation, a synchronized sticking strip, a Web Audio metronome, a tempo challenge, and a MusicXML score room in one static site.
 
 ## Project scope
 
@@ -55,6 +55,8 @@ python -m http.server 4173 --bind 127.0.0.1
 If your installation uses the Python launcher, use `py` in place of `python`. Keep this terminal open while using <http://127.0.0.1:4173/>; press **Ctrl+C** to stop the server.
 
 If the browser says the site cannot be reached, check that the terminal shows the server running and that the URL uses the same port. If port 4173 is already in use, start the server with `4174` instead and open <http://127.0.0.1:4174/>. A directory listing usually means the server was started outside the folder containing `index.html`.
+
+Start practice plays four count-in clicks at the starting BPM before the first written stroke. The count-in uses quarter-note beats in /4 meters and dotted-quarter beats in 6/8, 9/8, and 12/8, regardless of the selected note value. Stop cancels the count-in; starting again begins a fresh count. Practice time and bar counting begin with the first written stroke.
 
 ## Controls
 

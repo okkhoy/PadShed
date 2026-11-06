@@ -635,7 +635,7 @@ function rampForBarFactory(startBpm) {
     min: state.rampMin, max: state.rampTarget, step: state.rampStep, bars: state.rampBars });
 }
 
-async function startTrainer() {
+async function startTrainer({ countIn = true } = {}) {
   if (state.practiceMode === "combination" && !state.combinationIds.length) {
     showToast("Select at least one rudiment for your rotation.");
     return;
@@ -653,9 +653,11 @@ async function startTrainer() {
   setHeaderStatus("Warming up", "ready");
   audio.setVolume(state.volume / 100);
   notation.clearPlayhead();
+  resetSessionDisplay();
 
   try {
     const startInfo = await metronome.start({
+      countInBeats: countIn ? 4 : 0,
       bpm: state.rampEnabled ? state.rampMin : state.bpm,
       subdivision: currentSequenceData.rhythm.ticksPerBeat,
       beatsPerBar: currentSequenceData.meter.beatsPerBar,
@@ -681,10 +683,10 @@ async function startTrainer() {
     dom.transportBpm.textContent = String(Math.round(startInfo.bpm));
     dom.headerTempo.textContent = String(Math.round(startInfo.bpm));
     setHeaderStatus(
-      state.rampEnabled ? "Tempo trainer on" : "Playing",
+      countIn ? "Count in · 1 2 3 4" : state.rampEnabled ? "Tempo trainer on" : "Playing",
       state.rampEnabled ? "ramp" : "playing",
     );
-    notation.setPlayhead(0);
+    if (countIn) dom.changeIndicator.textContent = "Count in · 1 2 3 4";
     startElapsedTimer();
   } catch (error) {
     transportPlaying = false;
@@ -740,8 +742,9 @@ function scheduleTrainerRestart(delay = 120) {
     if (!transportPlaying) {
       return;
     }
+    const countIn = metronome.audio.currentTime < metronome.startTime;
     stopTrainer({ silent: true });
-    await startTrainer();
+    await startTrainer({ countIn });
   }, delay);
 }
 
@@ -766,6 +769,19 @@ function resetSessionDisplay() {
 function handleTrainerTick(event) {
   if (!transportPlaying) {
     return;
+  }
+
+  if (event.isCountIn) {
+    const label = `Count in · ${event.count} / 4`;
+    setHeaderStatus(label, "ready");
+    dom.changeIndicator.textContent = label;
+    dom.liveHand.textContent = label;
+    return;
+  }
+
+  if (event.index === 0) {
+    dom.changeIndicator.textContent = "";
+    setHeaderStatus("Playing", "playing");
   }
 
   lastTickBpm = event.bpm;

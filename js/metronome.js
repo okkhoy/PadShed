@@ -69,8 +69,21 @@ export class Metronome {
         ? options.getBpmForBar
         : () => this.settings.bpm;
 
-    this.startTime = this.audio.currentTime + 0.09;
-    this._planned = [];
+    // Count-in pulses use the BPM beat, independently of the note subdivision.
+    const countInBeats = options.countInBeats === 4 ? 4 : 0;
+    const countInStart = this.audio.currentTime + 0.09;
+    const beatDuration = 60 / this.settings.bpm;
+    this.startTime = countInStart + countInBeats * beatDuration;
+    this._planned = Array.from({ length: countInBeats }, (_, i) => ({
+      time: countInStart + i * beatDuration,
+      isCountIn: true,
+      count: i + 1,
+      bpm: this.settings.bpm,
+      hand: null,
+      accent: false,
+      level: 0.64,
+      isBarStart: false,
+    }));
     this._audioCursor = 0;
     this._tickCursor = 0;
     this._nextIndex = 0;

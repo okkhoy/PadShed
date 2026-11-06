@@ -65,6 +65,85 @@ test("live hand-tone switching follows planned sticking, including repeated hand
   });
 });
 
+test("four count-in pulses precede practice without consuming strokes, bars, or challenge steps", async () => {
+  const previousWindow = globalThis.window;
+  globalThis.window = { setInterval: () => 1, clearInterval() {},
+    requestAnimationFrame: () => 2, cancelAnimationFrame() {} };
+  try {
+    for (const bpm of [30, 120, 240]) {
+      for (const meterId of ["2/4", "4/4", "6/8", "9/8", "12/8"]) {
+        for (const value of [1, 2, 4]) {
+          const rhythm = getRhythm(value, meterId);
+          const scheduled = [], ticks = [], bars = [];
+          const audio = { currentTime: 10, ensure: async () => {},
+            playClick: (time, options) => scheduled.push({ time, ...options }) };
+          const click = new Metronome({ audio, onTick: e => ticks.push(e), onBar: e => bars.push(e) });
+          const info = await click.start({ bpm, countInBeats: 4,
+            subdivision: rhythm.ticksPerBeat, beatsPerBar: getMeter(meterId).beatsPerBar,
+            sequence: parsePattern("R L R R"), differentHandTones: true,
+            getBpmForBar: bar => bpm + bar });
+          assert.ok(Math.abs(info.startTime - (10.09 + 4 * 60 / bpm)) < 1e-8);
+          const intro = click._planned.filter(e => e.isCountIn);
+          assert.deepEqual(intro.map(e => e.count), [1, 2, 3, 4]);
+          intro.forEach((event, i) => {
+            assert.ok(Math.abs(event.time - (10.09 + i * 60 / bpm)) < 1e-8);
+            audio.currentTime = event.time;
+            click._maintain();
+            assert.equal(click.elapsed, 0);
+          });
+          assert.equal(bars.length, 0);
+          assert.equal(ticks.length, 4);
+          assert.ok(scheduled.slice(0, 4).every(e => e.hand === null));
+          const first = click._planned.find(e => !e.isCountIn);
+          assert.equal(first.index, 0);
+          assert.equal(first.sequenceIndex, 0);
+          assert.equal(first.bar, 0);
+          assert.equal(first.bpm, bpm);
+          assert.equal(first.hand, "R");
+          audio.currentTime = info.startTime;
+          click._maintain();
+          assert.equal(bars.length, 1);
+          assert.equal(ticks.at(-1), first);
+          assert.equal(scheduled[4].hand, "R");
+          click.stop();
+        }
+      }
+    }
+  } finally {
+    globalThis.window = previousWindow;
+  }
+});
+
+test("stopping a count-in cancels pending practice and restarting begins a fresh count", async () => {
+  const previousWindow = globalThis.window;
+  globalThis.window = { setInterval: () => 1, clearInterval() {},
+    requestAnimationFrame: () => 2, cancelAnimationFrame() {} };
+  try {
+    const ticks = [];
+    const audio = { currentTime: 0, ensure: async () => {}, playClick() {} };
+    const click = new Metronome({ audio, onTick: e => ticks.push(e) });
+    await click.start({ bpm: 120, countInBeats: 4 });
+    audio.currentTime = 0.1;
+    click._maintain();
+    assert.equal(ticks[0].count, 1);
+    click.stop();
+    audio.currentTime = 8;
+    click._pump();
+    assert.equal(ticks.length, 1);
+    assert.equal(click._planned.length, 0);
+    await click.start({ bpm: 120, countInBeats: 4 });
+    assert.equal(click._planned[0].count, 1);
+    assert.ok(click.startTime > 10);
+    // Score playback and automatic practice restarts can omit the count-in.
+    await click.start({ bpm: 120 });
+    assert.ok(click._planned.every(e => !e.isCountIn));
+    assert.equal(click.startTime, 8.09);
+    click.stop();
+  } finally {
+    globalThis.window = previousWindow;
+  }
+});
+
 test("compound meters have two, three, or four dotted-quarter pulses", () => {
   for (const [id, beats] of [["6/8", 2], ["9/8", 3], ["12/8", 4]]) {
     const meter = getMeter(id);
