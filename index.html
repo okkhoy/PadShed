@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3efe5">
+  <meta name="description" content="A focused practice room for the 40 PAS drum rudiments.">
+  <title>Rudiment Room — Practice studio</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script>try { document.documentElement.dataset.theme = localStorage.getItem('rudimentRoom.theme') === 'dark' ? 'dark' : 'light'; } catch {}</script>
+  <script defer src="https://cdn.jsdelivr.net/npm/vexflow@5.0.0/build/cjs/vexflow.js"></script>
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+<div class="app-shell">
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="Rudiment Room home"><span class="brand-mark">rr<span>•</span></span><span>Rudiment Room<small>THE DAILY PRACTICE</small></span></a>
+    <nav class="tab-list" role="tablist" aria-label="Practice modes">
+      <button class="tab-button is-active" id="tabTrainer" role="tab" aria-selected="true" aria-controls="trainerPanel">Practice</button>
+      <button class="tab-button" id="tabScore" role="tab" aria-selected="false" aria-controls="scorePanel" tabindex="-1">Score room</button>
+    </nav>
+    <div class="header-actions"><div class="status-chip" id="headerStatus"><i></i><span id="headerStatusText">Studio ready</span></div><button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Enable dark mode"><span id="themeIcon" aria-hidden="true">◐</span><span id="themeLabel">Dark mode</span></button></div>
+  </header>
+  <main>
+    <section class="tab-panel" id="trainerPanel" role="tabpanel" aria-labelledby="tabTrainer">
+      <div class="practice-layout">
+        <aside class="library panel" aria-label="Rudiment library">
+          <div class="section-heading"><span class="eyebrow">01 / LIBRARY</span><span class="badge" aria-hidden="true">&nbsp;</span></div>
+          <h1>Find your rhythm.</h1>
+          <div id="practiceMode" class="segmented" role="group" aria-label="Practice type"><button data-mode="basic" aria-pressed="true">Basic</button><button data-mode="combination" aria-pressed="false">Combination</button></div>
+          <label class="field-label" for="rudimentSelect">Rudiment</label>
+          <select id="rudimentSelect"></select>
+          <div class="rudiment-meta"><span id="rudimentFamily" class="family-chip">Rolls</span><span id="rudimentNumber" class="muted">PAS 01</span></div>
+          <p id="rudimentDescription" class="description"></p>
+          <div class="pattern-block"><span class="field-label">THE STICKING</span><div id="patternStrip" class="pattern-strip"></div></div>
+          <div id="combinationPanel" class="combination-panel" hidden><div class="field-row"><span class="field-label">YOUR ROTATION</span><span id="combinationCount" class="muted">0 / 4</span></div><p class="hint" id="combinationHint">Choose up to 4. Change every bar (4 beats).</p><div id="combinationList" class="combination-list"></div></div>
+          <div class="library-footer"><span class="status-dot"></span> A little better, every day.</div>
+        </aside>
+        <section class="settings panel" aria-label="Basic settings">
+          <div class="section-heading"><span class="eyebrow">02 / SET THE PULSE</span><label class="hand-tone-toggle" title="Practice strokes: right hand higher, left hand lower"><input type="checkbox" id="differentHandTones" role="switch" aria-label="Different hand tones: right higher, left lower"> R/L tones</label><span class="badge" id="bpmBeatLabel">quarter = 80</span></div>
+          <div class="settings-grid">
+            <div class="tempo-control"><div class="tempo-readout"><button id="bpmDown" class="step-button" aria-label="Decrease tempo by 5 BPM">−</button><div><strong id="bpmValue">80</strong><span class="unit">BPM</span></div><button id="bpmUp" class="step-button" aria-label="Increase tempo by 5 BPM">+</button></div><input id="bpmRange" type="range" min="30" max="240" value="80" aria-label="Tempo in beats per minute"></div>
+            <div class="subdivision-control">
+              <div id="subdivisionGroup" class="rhythm-selectors">
+                <label for="timeSignatureSelect">Time signature
+                  <select id="timeSignatureSelect"><option value="2/4">2/4</option><option value="3/4">3/4</option><option value="4/4" selected>4/4</option><option value="5/4">5/4</option><option value="6/4">6/4</option><option value="7/4">7/4</option><option value="6/8">6/8</option><option value="9/8">9/8</option><option value="12/8">12/8</option></select>
+                </label>
+                <label for="noteValueSelect">Notes
+                  <select id="noteValueSelect"><option value="1">Quarter · 1/4</option><option value="2">Eighth · 1/8</option><option value="3">Triplet eighth · 1/8T</option><option value="4" selected>Sixteenth · 1/16</option></select>
+                </label>
+              </div>
+              <span id="subdivisionName" class="visually-hidden">Sixteenth notes</span>
+              <div class="accent-options"><label><input type="checkbox" id="accentDownbeat" checked> Downbeat</label><label><input type="checkbox" id="accentEvents" checked> Written accents</label></div>
+            </div>
+            <div class="sound-control"><span class="field-label">Metronome sound</span><div id="soundGroup" class="segmented" role="group" aria-label="Click sound"><button data-sound="click" aria-pressed="true">Click</button><button data-sound="wood">Wood</button><button data-sound="stick">Stick</button></div><div class="volume-row"><label for="volumeRange">Volume</label><input id="volumeRange" type="range" min="0" max="100" value="75"><span id="volumeValue">75%</span></div></div>
+          </div>
+        </section>
+        <section class="notation-card panel" aria-label="Drum notation">
+          <div class="notation-head"><div><span class="eyebrow">03 / READ & REPEAT <span id="notationNumber">PAS 01</span></span><h2 id="notationTitle">Single Stroke Roll</h2></div><div class="notation-badges"><span class="badge" id="measureBadge">8 bars</span><span class="badge" id="subdivisionBadge">16th notes</span><span class="badge" id="meterBadge">4/4</span></div></div>
+          <div id="notationViewport" class="notation-viewport"><div id="notationStage" class="notation-stage"></div><div id="notationLoading" class="notation-loading">Preparing your music…</div><div id="notationError" class="notation-error hidden" role="status"></div></div>
+          <div class="transport" id="transportCard"><div class="transport-primary"><button class="play-button" id="playButton" data-state="idle"><span class="play-icon" aria-hidden="true"></span><span id="playLabel">Start practice</span></button><button class="round-button" id="resetButton" aria-label="Reset practice session" title="Reset session">↺</button></div><div class="transport-stats"><span>BAR <strong id="barStat">—</strong></span><span>TIME <strong id="timeStat">0:00</strong></span><span><strong id="transportBpm">80</strong> BPM</span></div><span class="keyboard-hint"><kbd>space</kbd> to play</span></div>
+          <span id="noteCount" class="visually-hidden"></span><span id="headerTempo" class="visually-hidden">80</span>
+        </section>
+        <section class="sticking panel" aria-label="Live sticking">
+          <div class="beat-lights" id="beatLights" aria-label="Beat indicator"><span>1</span><span>2</span><span>3</span><span>4</span></div>
+          <div class="hand-follow">
+            <span class="eyebrow">FOLLOW THE HAND</span>
+            <div id="handDisplay" class="hand-display" aria-label="Upcoming strokes"></div>
+            <span id="liveHand" class="visually-hidden">Ready</span>
+          </div>
+          <span id="changeIndicator" class="change-indicator"></span>
+        </section>
+        <section class="challenge panel" id="rampDetails" aria-label="Tempo challenge"><div class="challenge-intro"><span class="eyebrow">04 / PUSH YOUR RANGE</span><h2>Tempo challenge</h2><p id="rampCaption">Find your range. Build your control.</p></div><div class="challenge-controls"><label class="switch-label"><input type="checkbox" id="rampEnabled" role="switch"><span class="switch-track"></span><span>Enable challenge</span></label><div class="ramp-grid" id="rampFields"><label>Min BPM<input id="rampMin" type="number" min="30" max="240" value="80"></label><label>Max BPM<input id="rampTarget" type="number" min="30" max="240" value="120"></label><label>Step<input id="rampStep" type="number" min="1" max="20" value="4"></label><label>Every / bars<input id="rampBars" type="number" min="1" max="32" value="4"></label></div><p class="hint" id="rampSummary">80 ↔ 120 BPM · 4 BPM every 4 bars</p></div></section>
+      </div>
+    </section>
+      <section class="tab-panel" id="scorePanel" role="tabpanel" aria-labelledby="tabScore" hidden>
+        <div class="score-hero">
+          <div>
+            <span class="eyebrow">MusicXML room</span>
+            <h1>Read the page.<br><em>Keep the pulse.</em></h1>
+          </div>
+          <p>Open a built-in rudiment or drop in your own MusicXML. The score follows the click, one clean beat at a time.</p>
+        </div>
+
+        <div class="score-grid">
+          <aside class="score-sidebar" aria-label="Score settings">
+            <section class="card score-source-card">
+              <div class="card-kicker"><span>Score source</span></div>
+              <label class="field-label" for="scoreRudimentSelect">Built-in rudiment</label>
+              <div class="select-shell">
+                <select id="scoreRudimentSelect" aria-label="Score rudiment"></select>
+                <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m6 8 4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <button class="button button-secondary button-wide" id="scoreGenerate" type="button">
+                <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 3.5v13M3.5 10h13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+                Load selected score
+              </button>
+
+              <div class="source-divider"><span>or</span></div>
+
+              <input class="visually-hidden" id="scoreFileInput" type="file" accept=".xml,.musicxml,.mxl,application/xml,application/vnd.recordare.musicxml+xml">
+              <label class="file-drop" for="scoreFileInput">
+                <span class="file-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 15v4h14v-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+                <strong>Open MusicXML</strong>
+                <small>.xml, .musicxml or .mxl</small>
+              </label>
+
+              <div class="score-file-row">
+                <span class="file-name" id="scoreFileName">PAS 01 · Single Stroke Roll</span>
+                <button class="icon-text-button" id="scoreDownload" type="button">
+                  <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 3.5v9m0 0L6.5 9M10 12.5 13.5 9M4.5 15.5h11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  Download
+                </button>
+              </div>
+            </section>
+
+            <section class="card score-control-card">
+              <div class="card-kicker"><span>Playback</span><span class="mono-pill" id="scoreBeatLabel">4/4</span></div>
+              <div class="score-tempo-row">
+                <button class="step-button" id="scoreBpmDown" type="button" aria-label="Decrease score tempo by 5 BPM">−</button>
+                <div class="score-tempo-value"><span id="scoreBpmValue">80</span><small id="scoreTempoUnit">quarter BPM</small></div>
+                <button class="step-button" id="scoreBpmUp" type="button" aria-label="Increase score tempo by 5 BPM">+</button>
+              </div>
+              <input class="range" id="scoreBpmRange" type="range" min="30" max="240" step="1" value="80" aria-label="Score tempo in beats per minute">
+
+              <label class="toggle-row">
+                <input type="checkbox" id="scoreLoop">
+                <span class="toggle-track" aria-hidden="true"></span>
+                <span class="toggle-copy"><strong>Loop the score</strong><small>Restart the page without missing a beat.</small></span>
+              </label>
+
+              <div class="score-beat-lights" id="scoreBeatLights" aria-label="Score beat">
+                <span data-beat="0"></span>
+                <span data-beat="1"></span>
+                <span data-beat="2"></span>
+                <span data-beat="3"></span>
+              </div>
+            </section>
+          </aside>
+
+          <section class="card score-card">
+            <div class="score-toolbar">
+              <div class="score-title-lockup">
+                <span class="eyebrow">Now reading</span>
+                <h2 id="scoreTitle">Single Stroke Roll</h2>
+              </div>
+              <div class="score-player-actions">
+                <button class="play-button play-button-small" id="scorePlayButton" type="button" data-state="idle">
+                  <span class="play-icon" id="scorePlayIcon" aria-hidden="true"></span>
+                  <span id="scorePlayLabel">Play score</span>
+                </button>
+                <button class="round-button" id="scoreResetButton" type="button" aria-label="Reset score playback" title="Back to start">
+                  <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4.5 7.5A6 6 0 1 1 4 12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M4.5 3.5v4h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="score-paper" id="scorePaper">
+              <div class="osmd-container" id="osmdContainer"></div>
+              <span class="score-pan-hint" aria-hidden="true">Swipe to read</span>
+              <div class="score-loading" id="scoreLoading">
+                <span class="loading-line" aria-hidden="true"></span>
+                Engraving the score…
+              </div>
+              <div class="score-error hidden" id="scoreError" role="status"></div>
+            </div>
+
+            <div class="score-foot">
+              <span id="scoreStatus">Ready when you are.</span>
+              <span>VexFlow notation · OSMD score · Web Audio click</span>
+            </div>
+          </section>
+        </div>
+      </section>
+  </main>
+<footer class="site-footer"></footer>
+</div>
+<div class="toast-region" id="toastRegion" aria-live="polite"></div>
+</body>
+</html>
